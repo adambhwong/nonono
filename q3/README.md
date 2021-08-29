@@ -25,19 +25,19 @@ terraform apply
 ```
 ./test_docker.sh -k <Key ID:Secret Key:Region>
 ```
-You can test the API at this stage with 'curl' command agaist the image port '9099'.
-3. Tag and push the image to your docker registry.
-4. Change directory to /chart, modify values.yaml regarding to your environment.
-5. Create the namespace for the deployment.
-6. Create the aws-secert in namespace, the secret should contain "id", "key", "region" regarding to the AWS configuration.
-7. Use helm cli to install the app:
+You can test the API at this stage with 'curl' command agaist the image port '9099'.  
+3. Tag and push the image to your docker registry.  
+4. Change directory to /chart, modify values.yaml regarding to your environment.  
+5. Create the namespace for the deployment.  
+6. Create the aws-secert in namespace, the secret should contain "id", "key", "region" regarding to the AWS configuration.  
+7. Use helm cli to install the app:  
 ```
 helm -n <namespace> install production .
-```
-8. Verfiy the service with curl post and get:
-```
+```  
+8. Verfiy the service with curl post and get:  
+```  
 curl -d '{"url": "https://www.google.com"}' -X POST <Service URL>/newurl
-```
+```  
 You should get the shorten URL from output, and try curl with it:
 ```
 curl -i <shorten url>
@@ -51,12 +51,11 @@ Connection: close
 content-location: https://www.google.com
 ```
 
-Design:
-
-user request ----> url-shortener-api@EKS <---> ShortenUrl-table@DynamoDB
-
+Design:  
+  
+user request ----> url-shortener-api@EKS <---> ShortenUrl-table@DynamoDB      
+  
 1. The service logics run in the container "url-shortener-api", and data stored in AWS DynamoDB table. 
 2. Since the DynamoDB table is a managed service provided by AWS, it already cater HA ability.
 3. While the data is stored in DynamoDB, you can deploy any replica count of url-shortener-api in kubernetes clusters.
 4. To scale up the service, simply modfiy the replica count in Kubernetes deployment.
-
