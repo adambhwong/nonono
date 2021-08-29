@@ -24,8 +24,9 @@ terraform apply
 2. Build the source with the 'test_docker.sh' script, you should provide the AWS access key ID, secret key & region as parameter:  
 ```
 ./test_docker.sh -k <Key ID:Secret Key:Region>
+
+** You can test the API at this stage with 'curl' command agaist the image port '9099'.  
 ```
-You can test the API at this stage with 'curl' command agaist the image port '9099'.  
 3. Tag and push the image to your docker registry.  
 4. Change directory to /chart, modify values.yaml regarding to your environment.  
 5. Create the namespace for the deployment.  
