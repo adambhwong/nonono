@@ -1,0 +1,21 @@
+#!/bin/bash
+
+function usage {
+  echo "$0 <tag>"
+}
+
+if [ "$1" == "" ]
+then
+    usage
+    exit 1
+fi
+
+ip="`aws ec2 describe-instances --filters Name=tag-key,Values=$1 --query "Reservations[*].Instances[*].PublicIpAddress" --output text`"
+if [ "$ip" == "" ]
+then
+    echo "Host not found."
+    exit 2
+fi
+echo "Public IP: $ip"
+#echo "ssh ec2-user@$ip"
+ssh ec2-user@$ip

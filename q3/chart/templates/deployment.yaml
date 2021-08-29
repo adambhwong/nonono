@@ -1,0 +1,84 @@
+{{- $fullName := .Values.gitlab.app -}}
+{{- $svcPort := .Values.service.port -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName | quote }}
+  annotations: 
+    app.gitlab.com/env: {{ .Values.gitlab.env }}
+    app.gitlab.com/app: {{ .Values.gitlab.app }}
+  labels:
+{{ include "chart.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $fullName | quote }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      name: {{ $fullName | quote }}
+      labels:
+        app.kubernetes.io/name: {{ $fullName | quote }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations: 
+        app.gitlab.com/env: {{ .Values.gitlab.env }}
+        app.gitlab.com/app: {{ .Values.gitlab.app }}
+    spec:
+    {{- with .Values.image.secrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ $fullName | quote }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.secret }}"
+              key: id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.secret }}"
+              key: key
+        - name: AWS_DEFAULT_REGION
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.secret }}"
+              key: region
+        ports:
+        - name: main-port
+          containerPort: {{ $svcPort }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /
+            port: {{ $svcPort }}
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /
+            port: {{ $svcPort }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

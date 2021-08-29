@@ -1,0 +1,31 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := .Values.gitlab.app -}}
+{{- $svcPort := .Values.service.port -}}
+{{- $host := .Values.service.url | replace "http://" "" | quote -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName | quote }}
+  labels:
+{{ include "chart.labels" . | indent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  tls:
+    - hosts:
+        - {{ $host }}
+      secretName: {{ .Values.application.secretName }}
+  rules:
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: "/"
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $fullName | quote }}
+                port: 
+                  number: {{ $svcPort }}
+{{ end }}
