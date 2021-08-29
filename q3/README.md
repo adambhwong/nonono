@@ -14,6 +14,8 @@ Prerequisites:
 8. A Docker Registry should be ready for hosting the docker image produced.
 9. A URL ready for use as the service endpoint of this deployment.
 10. The kubernetes should support ACME to generate SSL cert along the deployment.
+11. You should have setup route53 pointing the service FQDN to the EKS ingress public IP.
+
 
 Deployment procedure:  
 1. Create the Dynamodb table on AWS by execute following commands under /tf folder:  
